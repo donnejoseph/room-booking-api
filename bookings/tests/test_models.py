@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 User = get_user_model()
 
 
+@pytest.mark.django_db
 @pytest.mark.bookings
 @pytest.mark.unit
 class TestBookingModel:

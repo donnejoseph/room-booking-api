@@ -38,12 +38,6 @@ class Booking(models.Model):
                 check=models.Q(end_time__gt=models.F('start_time')),
                 name='end_time_after_start_time'
             ),
-            # Prevent overlapping bookings for the same room
-            models.UniqueConstraint(
-                fields=['room', 'date'],
-                condition=models.Q(start_time__lt=models.F('end_time')),
-                name='unique_room_booking_timeslot',
-            ),
         ]
         indexes = [
             models.Index(fields=['user']),
