@@ -16,12 +16,27 @@ class RoomFilter(django_filters.FilterSet):
     floor = django_filters.NumberFilter(field_name='floor')
     capacity = django_filters.NumberFilter(field_name='capacity', lookup_expr='gte')
     date = django_filters.DateFilter(method='filter_availability')
-    start_time = django_filters.TimeFilter()
-    end_time = django_filters.TimeFilter()
+    start_time = django_filters.TimeFilter(method='filter_ignored')
+    end_time = django_filters.TimeFilter(method='filter_ignored')
     
     class Meta:
         model = Room
         fields = ['floor', 'capacity', 'date', 'start_time', 'end_time']
+    
+    def filter_ignored(self, queryset, name, value) -> Any:
+        """
+        Placeholder filter method that doesn't filter.
+        These parameters are actually used in filter_availability.
+        
+        Args:
+            queryset: QuerySet to filter
+            name: Name of the filter field
+            value: Filter value
+            
+        Returns:
+            QuerySet: Unfiltered queryset
+        """
+        return queryset
         
     def filter_availability(self, queryset, name, value) -> Any:
         """
@@ -30,7 +45,7 @@ class RoomFilter(django_filters.FilterSet):
         Args:
             queryset: QuerySet to filter
             name: Name of the filter field
-            value: Filter value
+            value: Filter value (date)
             
         Returns:
             QuerySet: Filtered queryset

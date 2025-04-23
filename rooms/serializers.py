@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from .models import Room
 from typing import Dict, Any
+from django.utils import timezone
+from datetime import datetime
+from django.utils.dateparse import parse_date
+from django.db import models
+from bookings.models import Booking
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -61,5 +66,23 @@ class RoomDetailSerializer(RoomSerializer):
         
         if not all([date, start_time, end_time]):
             return True
-            
-        return obj.is_available(date, start_time, end_time) 
+        
+        # Parse the date if it's a string
+        if isinstance(date, str):
+            try:
+                parsed_date = parse_date(date)
+                if parsed_date:
+                    date = parsed_date
+            except Exception:
+                pass
+        
+        # Check if there are any overlapping bookings
+        overlapping_bookings = Booking.objects.filter(
+            room=obj,
+            date=date,
+        ).filter(
+            models.Q(start_time__lt=end_time, end_time__gt=start_time)
+        )
+        
+        is_available = not overlapping_bookings.exists()
+        return is_available 

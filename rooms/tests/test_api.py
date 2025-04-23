@@ -11,6 +11,7 @@ User = get_user_model()
 
 @pytest.mark.rooms
 @pytest.mark.api
+@pytest.mark.django_db
 class TestRoomAPI:
     """Tests for Room API endpoints."""
     
@@ -116,7 +117,14 @@ class TestRoomAPI:
         """Test updating room as admin."""
         api_client.force_authenticate(user=admin_user)
         url = reverse('room-detail', args=[room.id])
-        update_data = {'name': 'Updated Room'}
+        
+        # Include all required fields in the update data
+        update_data = {
+            'name': 'Updated Room',
+            'floor': room.floor,  # Keep the existing floor value
+            'capacity': room.capacity  # Keep the existing capacity value
+        }
+        
         response = api_client.patch(url, update_data, format='json')
         
         assert response.status_code == status.HTTP_200_OK
